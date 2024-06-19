@@ -60,12 +60,12 @@ if __name__ == '__main__':
     if not any([args.page, args.table, args.icdar, args.finetune]):
         print(parser.print_help())
 
-    Path(parser.output_dir).mkdir(parents=True, exist_ok=True)
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
 
     if args.page:
         entity_detector = stage1_entity_detector.EntityDetector(detection_max_instances=100)
         detect_structures_single_page(
-            parser.image_filepath,
+            args.image_filepath,
             entity_detector,
-            parser.output_dir
+            args.output_dir
         )
