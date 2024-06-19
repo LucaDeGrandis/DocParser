@@ -33,6 +33,7 @@ def detect_structures_single_page(
         save_images_with_predictions: bool
 ):
     """Detects structures in a single page"""
+    print(image_filepath)
     image = skimage.io.imread(image_filepath)
     entity_predictions = entity_detector.predict(image)
 
@@ -85,7 +86,6 @@ def detect_structures_single_page(
         class_colors = set([x['class_name'] for x in predictions_dict['prediction_list']])
         class_colors = {_class: (np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255)) for _class in class_colors}
         for info in predictions_dict['prediction_list']:
-            print(info)
             bbox = info['bbox_orig_coords']
             y, x, h, w = list(map(int, bbox))
             cv2.rectangle(img, (x, y), (w, h), class_colors[info['class_name']], 2)
@@ -116,9 +116,6 @@ if __name__ == '__main__':
             "Please run script from the 'docparser' directory (/PATH_TO_CODE/emnlp_codes/docparser), current dir: {}".format(
                 current_dir))
         raise
-
-    if not any([args.page]):
-        print(parser.print_help())
 
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
 
