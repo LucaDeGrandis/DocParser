@@ -19,7 +19,7 @@ from docparser.utils.eval_utils import generate_obj_detection_results_based_on_d
 
 logger = logging.getLogger(__name__)
 logging.getLogger().setLevel(logging.INFO)
-import tqdm
+from tqdm import tqdm
 
 from typing import Any
 
@@ -99,11 +99,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='DocParser Demoscript'
     )
-    parser.add_argument('--page', action='store_true',
-                        help='Run and evaluate DocParser default models for page structure parsing on arXivDocs-target')
-    parser.add_argument('--image_filepath', type=str, help='Path to the image file')
+    parser.add_argument('--image_filepath', type=str, default=None, help='Path to the image file')
+    parser.add_argument('--input_filepath', type=str, default=None, help='Path to the directory with multiple image files')
     parser.add_argument('--output_dir', type=str, help='Path for the output predictions')
     args = parser.parse_args()
+
+    assert sum([args.image_filepath is not None, args.input_filepath is not None]) == 1
 
     cwd_path = os.getcwd()
     demo_dir = 'DocParser'
@@ -121,7 +122,7 @@ if __name__ == '__main__':
 
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
 
-    if args.page:
+    if args.image_filepath is not None:
         entity_detector = stage1_entity_detector.EntityDetector()
         entity_detector.init_model(model_log_dir=args.output_dir, default_weights='highlevel_wsft')
         structure_parser = stage2_structure_parser.StructureParser()
@@ -133,3 +134,17 @@ if __name__ == '__main__':
             True,
             True,
         )
+    else:
+        images = glob(f'{args.input_filepath}/*')
+        entity_detector = stage1_entity_detector.EntityDetector()
+        entity_detector.init_model(model_log_dir=args.output_dir, default_weights='highlevel_wsft')
+        structure_parser = stage2_structure_parser.StructureParser()
+        for image_filepath in tqdm(images):
+            detect_structures_single_page(
+                image_filepath,
+                entity_detector,
+                structure_parser,
+                args.output_dir,
+                True,
+                True,
+            )
